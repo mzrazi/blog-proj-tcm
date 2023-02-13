@@ -1,0 +1,20 @@
+<div class="container my-5">
+  <h1 class="text-center mb-5">Articles</h1>
+  <div class="row">
+
+    <a class="btn btn-primary" href="/add-article">add article </a>
+
+    {{#each articles}}
+      <div class="col-md-4 mb-5">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{this.title}}</h5>
+            <p class="card-text">{{this.body}}</p>
+            <a href="/edit/{{this._id}}" class="btn btn-primary mr-2">Edit</a>
+            <a href="/delete/{{this._id}}" class="btn btn-danger">Delete</a>
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>
