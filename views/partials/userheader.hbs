@@ -16,19 +16,24 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">contact us<span class="badge badge-light" id="cart-count">{{cartCount}}</span></a>
                     </li>
-                    {{#if user}}
+                    {{#if session.userloggedin}}
                     <li class="nav-item">
-                        <a href="/orders" class="nav-link">account</a>
+                        <a href="" class="nav-link">account</a>
 
                     </li>
                     
                         {{/if}}
                        
                        </div>
-                        {{#if user}}
+                        {{#if session.userloggedin}}
                         
                        <a href="/logout">logout</a>
            
+            {{/if}}
+
+            {{#if session.managerloggedin}}
+            <a href="/manager/managerlogout">logout</a>
+
             {{/if}}
         </nav>
     </section>

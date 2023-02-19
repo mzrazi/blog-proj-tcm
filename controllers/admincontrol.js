@@ -47,5 +47,15 @@ module.exports={
             } catch (error) {
                 return error
             }
-        }
+        },
+        verifyadmin(req,res,next){
+            if (req.session.adminloggedin) {
+        
+    
+                next()
+                
+              } else {
+                res.redirect('/admin')
+              }
+            }
 }

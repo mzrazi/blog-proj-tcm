@@ -1,0 +1,49 @@
+<h1 class="text-center">Articles </h1>
+
+{{#each articles}}
+<div class="card my-4 mt-5 mb-5">
+  <div class="card-body">
+    <h5 class="card-title">{{title}}</h5>
+    <h6 class="card-subtitle mb-2 text-muted">{{author}}</h6>
+    <p class="card-text">{{content}}</p>
+    <div class="rating">
+      <input id="rating-input-{{this._id}}" name="rating-input-{{this._id}}" type="number" class="rating" min="1" max="5" step="1" data-size="sm" data-stars="5" data-show-clear="false" value="{{averageRating}}">
+    </div>
+   
+    <form method="POST" action="/rate-article/{{this._id}}">
+      <div class="form-group">
+        <select name="rating">
+          <option value="1">1 Star</option>
+          <option value="2">2 Stars</option>
+          <option value="3">3 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="5">5 Stars</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <hr>
+    <h6>Comments:</h6>
+    {{#each comments}}
+    <div class="card my-2">
+      <div class="card-body">
+        <p class="card-text">{{text}}</p>
+        <p class="card-subtitle mb-2 text-muted">By {{commentedby}}</p>
+      </div>
+    </div>
+    {{/each}}
+ {{#if ../session.userpremium}}
+    <div class="card">
+      <h3>{{../_id}}</h3>
+      <form method="POST" action="/save-comment/{{./_id}}">
+        <div class="form-group">
+          <label for="comment">Comment:</label>
+          <textarea id="comment" name="comment" class="form-control" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+    {{/if}}
+  </div>
+</div>
+{{/each}}

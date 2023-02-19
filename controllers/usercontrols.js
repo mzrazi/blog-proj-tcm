@@ -1,7 +1,7 @@
 
 var bcrypt=require('bcrypt');
-const { response } = require('express');
-const articlemodel = require('../models/articlemodel');
+
+const {article,comment,rating} = require('../models/articlemodel');
 
 const usermodels = require('../models/usermodels');
 
@@ -38,7 +38,7 @@ try {
 
     var user= await usermodels.findOne({"email":userdata.email}).exec()
     if (user){
-        console.log(user);
+      
         var password=userdata.password
         var hash=user.password
         var  status=bcrypt.compare(password,hash)
@@ -66,18 +66,143 @@ try {
 
     },
 
-    addarticle:async(req,res)=>{
-        var data=req.body
-         
-        var newarticle = new articlemodel({
-            topic: data.topic,
-            article: data.article,
-           
-           
-          })
-         response= await newarticle.save().exec()
-         console.log(response);
+  
+
+    
+    verifyuser:(req,res,next)=>{
+      if (req.session.userloggedin) {
+  
+
+          next()
+          
+        } else {
+          res.redirect('/login')
+        }
+      },
 
 
+
+      savearticle:async(data,author,userid)=>{
+
+        var {topic,title,content}=data
+      
+        var newarticle=new article({
+          author,topic,title,content,userid,
+          approved:false,
+
+        })
+
+         var response= await newarticle.save()
+
+        return response
+    
+
+        
+
+      },
+      myarticles:async(auth)=>{
+
+        var response= await article.find({author:auth}).exec()
+        
+        return response
+      },
+      deletearticle:async(id)=>{
+       var repose=await  article.findByIdAndDelete(id)
+        console.log(repose);
+        return true
+      },
+      findarticle:async(id)=>{
+
+        var articles=await article.findById(id).exec()
+        console.log(articles);
+        return articles
+      },
+      approvedarticles:async()=>{
+        var articles=await article.find({approved:true}).exec()
+       
+        return articles
+      },
+savecomment:(username,com,articleid)=>{
+const newcomment = new comment({
+  commentedby:username,
+  text:com,
+});
+
+// Find an article and add the comment and rating
+article.findOne({_id:articleid}, (err, article) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  article.comments.push(newcomment);
+ 
+
+  article.save((err) => {
+    if (err) {
+      console.error(err);
+      return;
     }
+
+    console.log('Article saved with comment.');
+  });
+});
+
+
+      },
+
+ratingsave: async (username, userrating, articleid) => {
+        console.log(username)
+        console.log(userrating);
+      
+        try {
+          const articles = await article.findById(articleid);
+          const existingRating = articles.ratings.find(rating => rating.user === username);
+      
+          if (existingRating) {
+            // update the existing rating
+            existingRating.value = userrating;
+          } else {
+            // add a new rating
+            const newRating = new rating({
+              user: username,
+              value: userrating,
+            });
+            articles.ratings.push(newRating);
+          }
+      
+          await articles.save();
+      
+          console.log('Article saved with rating.');
+          return article.averageRating;
+        } catch (err) {
+          console.error(err);
+          throw err;
+        }
+      }
+      ,
+
+ averageUserRating: async (userId) => {
+ try {
+      const articles = await article.find({ userid: userId });
+      const sum = articles.reduce((total, obj) => total + obj.averageRating, 0);
+      const avg = sum / articles.length;
+      console.log(avg);
+      return avg;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  },
+  editarticle:(id,updates)=>{
+
+  try {
+    article.findOneAndUpdate({ _id: id }, { $set: {updates} });
+  } catch (error) {
+    console.log(error);
+    
+  }
+
+  }
+  
 }

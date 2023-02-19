@@ -1,7 +1,7 @@
 var bcrypt=require('bcrypt');
 const { default: mongoose } = require('mongoose');
 var manager=require("../models/managermodel")
-
+const {article} = require('../models/articlemodel');
 
 
 module.exports={
@@ -35,6 +35,7 @@ module.exports={
       return new Promise((resolve, reject) => {
         var response={}
         manager.findOne({email:userdata.email }, (err, user) => {
+          console.log(user);
             if (err) {
               console.log(err);
               
@@ -50,7 +51,7 @@ module.exports={
                 response.message="not verified"
                 resolve (response)
               } else {
-                bcrypt.compare(userdata.password, user.Password, (error, result) => {
+                bcrypt.compare(userdata.password, user.password, (error, result) => {
                   if (error) {
                     response.status=false
                     response.message="error"
@@ -95,5 +96,40 @@ module.exports={
         } catch (error) {
             return error
         }
+      },
+      verifymanager:(req,res,next)=>{
+        if (req.session.managerloggedin) {
+    
+
+            next()
+            
+          } else {
+            res.redirect('/manager')
+          }
+        },
+        allarticles:async()=>{
+        var articles=await  article.find({}).exec()
+            console.log(articles);
+            return articles
+            
+         
+        },
+        approvearticle: async (id) => {
+          try {
+            await article.findOneAndUpdate({ _id: id }, { $set: { approved: true } });
+            console.log("approved");
+            return true;
+          } catch (err) {
+            console.error(err);
+            return false;
+          }
+        }
+        ,
+rejectarticle:async(id)=>{
+       await article.findByIdAndDelete(id)
+       console.log("rejected")
+       return true
+        }
+        
       }
-}
+    

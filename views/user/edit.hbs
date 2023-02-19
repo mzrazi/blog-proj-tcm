@@ -1,21 +1,22 @@
 <div class="container">
-    <form action="/add-article" method="post">
+    <form action="/edit-article/{{article._id}}" method="post">
           <label for="topicSelect">Topic:</label><br>
    <select class="form-control" name="topic"  id="topicSelect" required>
+   
     {{#each topics}}
-    <option value="{{topic}}">{{topic}}</option>
+    <option value="{{../article.topic}}">{{topic}}</option>
     {{/each}}
   </select>
 
 
 
-
+ 
 
   <label for="title">Title:</label><br>
-  <input class="form-control" type="text" id="title" name="title"><br><br>
+  <input class="form-control" value="{{article.title}}" type="text" id="title" name="title"><br><br>
 
   <label for="content">Content:</label><br>
-  <textarea class="form-control" id="content" name="content" rows="10" cols="30"></textarea><br><br>
+  <textarea class="form-control"  id="content" name="content" rows="10" cols="30">{{article.content}}</textarea><br><br>
    
   <br><br>
 

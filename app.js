@@ -15,6 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 var userRouter = require('./routes/user');
 var adminRouter = require('./routes/admin');
+var managerRouter=require('./routes/manager')
 
 
 dbConnect()
@@ -45,6 +46,7 @@ app.use(function(req, res, next) {
 
 app.use('/', userRouter);
 app.use('/admin', adminRouter);
+app.use('/manager',managerRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,7 +1,7 @@
 var express = require('express');
 const { viewtopics } = require('../controllers/admincontrol');
-const { managersignup, managerlogin } = require('../controllers/managercontrol');
-const { usersignup, userlogin } = require('../controllers/usercontrols');
+
+const { usersignup, userlogin, verifyuser, savearticle, myarticles, deletearticle, findarticle, approvedarticles, ratingsave, savecomment, averageUserRating, editarticle} = require('../controllers/usercontrols');
 var router = express.Router();
 
 /* GET home page. */
@@ -26,8 +26,11 @@ if(response){
 }
 })
 router.get('/login',(req,res)=>{
+
+ 
   if (req.session.user) {
     try {
+      
       res.render('/',{user:req.session.user});
      } catch (err) {
       console.error(err);
@@ -42,6 +45,8 @@ router.get('/login',(req,res)=>{
       res.render('error', { "error": err });
     }
   }
+
+ 
   
 })
 
@@ -49,9 +54,16 @@ router.get('/login',(req,res)=>{
 router.post('/login',async(req,res)=>{
 
   var user= await userlogin(req.body)
-  console.log(user);
+ 
   if(user){
     req.session.user=user
+    req.session.userloggedin=true
+    const avgRating = await averageUserRating(req.session.user._id);
+    if (avgRating > 4.0) {
+      req.session.userpremium = true;
+    } else {
+      req.session.userpremium = false;
+    }
 
     res.render('user/index',{user:req.session.user})
 
@@ -64,46 +76,81 @@ router.post('/login',async(req,res)=>{
 })
 router.get('/logout', (req, res) => {
   req.session.user=null
+  req.session.userloggedin=false
   res.redirect('/login')
 
 })
-router.get('/myblogs',(req,res)=>{
-  res.render('user/myblogs')
+router.get('/myblogs',verifyuser,async(req,res)=>{
+  var firstname=req.session.user.firstname
+  var lastname=req.session.user.lastname
+  
+  var fullname= firstname+ "" +lastname
+
+ var articles=await myarticles(fullname)
+ 
+  res.render('user/myblogs',{articles})
 })
-router.get('/addarticle',(req,res)=>{
 
 
 
-})
-
-router.get("/managerlogin" ,(req,res)=>{
-
-res.render("manager/managerlogin")
-})
-router.post("/managerlogin",async(req,res)=>{
 
 
-   managerlogin(req.body).then((resp)=>{
-  if(resp.status){
-    res.render('manager/approve')
-  }else{
-    res.render("manager/managerlogin" ,{message:resp.message})
-  }
-})
-router.get("/managersignup" ,async(req,res)=>{
-  var topics=await viewtopics()
-  res.render("manager/managersignup",{topics})
-  })
+router.get("/add-article", verifyuser, async(req,res)=>{
 
-  router.post("/managersignup" ,async(req,res)=>{
-  var response=await managersignup(req.body)
-  if(response){
-    res.render('manager/managerlogin',{message:"you can login when admin approves"})
-  }else{
-    res.redirect('/managersignup',{message:"signup failed"})
-  }
-})
+      var topics=await viewtopics()
+      res.render("user/add-article",{topics})
+
     })
+
+router.post("/add-article",verifyuser,async(req,res)=>{
+      var firstname=req.session.user.firstname
+      var lastname=req.session.user.lastname
+      var id=req.session.user._id
+      var fullname= firstname+ "" +lastname
+     
+       await savearticle(req.body,fullname,id)
+
+      res.redirect("/add-article")
+    })
+router.get("/delete/:id",(req,res)=>{
+  deletearticle(req.params.id)
+  res.redirect("/myblogs")
+})
+
+router.get("/edit/:id",async(req,res)=>{
+ var article=await findarticle(req.params.id)
+ var topics=await viewtopics()
+  res.render("user/edit",{article,topics})
+})
+
+
+router.get("/articles",verifyuser,async(req,res)=>{
+
+  var articles= await approvedarticles()
+  res.render("user/articles",{articles})
+})
+router.post("/rate-article/:id",verifyuser,(req,res)=>{
+  
+  var username=req.session.user.firstname+req.session.user.lastname
+  
+  var rating=req.body.rating
+ var id=req.params.id
+  ratingsave(username,rating,id)
+  res.redirect('/articles')
+})
+router.post('/save-comment/:id',(req,res)=>{
+  var username=req.session.user.firstname+req.session.user.lastname
+  
+  var comment=req.body.comment
+ var id=req.params.id
+ savecomment(username,comment,id)
+res.redirect('/articles')
+})
+
+router.post("edit-article/:id",(req,res)=>{
+  editarticle(req.params.id,req.body)
+  res.redirect('/manager/approve')
+})
 
 
 

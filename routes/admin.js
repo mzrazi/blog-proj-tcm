@@ -18,7 +18,7 @@ router.post('/adminlogin',(req,res)=>{
       req.session.adminloggedin=true;
       res.render('admin/adminpage',{admin:true})
     }else{
-      res.redirect('/admin/adminlogin',{message:"invalid "})
+      res.render('admin/adminlogin',{message:"invalid",admin:true})
     }
   })
 })
