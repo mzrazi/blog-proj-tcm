@@ -7,6 +7,10 @@ var router = express.Router();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {   
+  req.session.user=null
+ 
+  req.session.managerloggedin=false
+  req.session.userloggedin=false
   res.render('admin/adminlogin',{admin:true})
 });
 router.post('/adminlogin',(req,res)=>{
@@ -14,7 +18,7 @@ router.post('/adminlogin',(req,res)=>{
     
     
     if(response.status){
-      req.session.admin=response.admin
+      req.session.user=response.admin
       req.session.adminloggedin=true;
       res.render('admin/adminpage',{admin:true})
     }else{

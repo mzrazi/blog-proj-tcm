@@ -6,6 +6,9 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  req.session.user=null
+  req.session.adminloggedin=false
+  req.session.managerloggedin=false
   res.render('user/index',{user:req.session.user});
 });
 
@@ -58,12 +61,7 @@ router.post('/login',async(req,res)=>{
   if(user){
     req.session.user=user
     req.session.userloggedin=true
-    const avgRating = await averageUserRating(req.session.user._id);
-    if (avgRating > 4.0) {
-      req.session.userpremium = true;
-    } else {
-      req.session.userpremium = false;
-    }
+   
 
     res.render('user/index',{user:req.session.user})
 
@@ -125,7 +123,12 @@ router.get("/edit/:id",async(req,res)=>{
 
 
 router.get("/articles",verifyuser,async(req,res)=>{
-
+  const avgRating = await averageUserRating(req.session.user._id);
+  if (avgRating > 4.0) {
+    req.session.userpremium = true;
+  } else {
+    req.session.userpremium = false;
+  }
   var articles= await approvedarticles()
   res.render("user/articles",{articles})
 })

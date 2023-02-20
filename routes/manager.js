@@ -1,9 +1,14 @@
 
 var express = require('express');
+const { viewtopics } = require('../controllers/admincontrol');
 const { verifymanager, allarticles, managersignup, managerlogin, approvearticle, rejectarticle } = require('../controllers/managercontrol');
 var router = express.Router();
 
 router.get("/" ,(req,res)=>{
+
+  req.session.user=null
+  req.session.adminloggedin=false
+  req.session.userloggedin=false
 
     res.render("manager/managerlogin")
     })
